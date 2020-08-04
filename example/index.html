@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="../dist/rrweb.min.css" />
+
+
+    <!--  <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.css"/>
+
+      <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.js"></script>-->
+    <title>第二个测试页面</title>
+    <script src="../dist/rrweb.min.js"></script>
+    <script src="./dzqm.js"></script>
+
+     <script>
+         var stopRecordFun = null;
+         var events = [];
+
+         function record() {
+             console.log("record");
+             stopRecordFun = XQWebRecord.record({
+                 emit(event) {
+                     // 用任意方式存储 event
+                     console.log(event);
+                     events.push(event);
+                 },
+             });
+             console.log(stopRecordFun)
+         }
+
+         function stopRecord() {
+             console.log(stopRecordFun)
+             if (stopRecordFun != null) {
+                 stopRecordFun();
+                 stopRecordFun = null;
+                 console.log("停止")
+                 var str = JSON.stringify(events);
+                 console.log(str);
+             }
+         }
+
+         function replay() {
+             var replayer = new XQWebRecord.Replayer(events,{
+                 root:document.body,
+                 //自定义播放时，某些组件不显示或者显示
+                 insertStyleRules:[
+                     `.play_hidden {display:none !important}`,
+                     `.play_show {display:block !important}`,
+                 ]
+             });
+             replayer.play();
+         }
+
+         window.onload=function () {
+            console.log(document.styleSheets);
+         }
+
+         if(window.onload){
+             var onloadCall = window.onload;
+             window.onload = function () {
+                 var ele = document.getElementById("dzqm");
+                 var eleSign = new EleSign();//实例化对象
+                 eleSign.init(); //初始化
+                 eleSign.moutedEle(ele); //将签名节点放入到传入的element节点中
+                 ele.addEventListener("mouseup",function () {
+                        console.log("移动结束");
+                       var base64 =   eleSign.toJpeg();
+                        document.getElementById("dzqm_img").src = base64;
+                 });
+                 onloadCall();
+             }
+         }
+     </script>
+    <style>
+       .play_show{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <button onclick="record()">开始录制</button>
+    <button onclick="stopRecord()">停止录制</button>
+    <button onclick="replay()">开始回放</button>
+
+</div>
+<div id="app"></div>
+<div class="backgroudDiv"></div>
+<div>
+    <div>
+        <span>投保人名称</span>
+        <input type="text" XQ="投保人名称"/>
+    </div>
+    <div>
+        <span>投保人年龄</span>
+        <input type="text" XQ="投保人年龄"/>
+    </div>
+    <div>
+        <span>投保人性别</span>
+        <input type="text" XQ="投保人性别"/>
+    </div>
+</div>
+
+<div id="dzqm" style="width: 400px;
+    height: 400px;
+    border: 1px solid;" class="play_hidden"></div>
+<div id="dzqm2" style="width: 400px;
+    height: 400px;
+    border: 1px solid;" class="play_show">
+    <img src="" id="dzqm_img">
+</div>
+<!-- built files will be auto injected -->
+</body>
+</html>
