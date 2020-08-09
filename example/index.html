@@ -14,6 +14,7 @@
     <title>第二个测试页面</title>
     <script src="../dist/rrweb.min.js"></script>
     <script src="./dzqm.js"></script>
+    <script src="./events.js"></script>
 
      <script>
          var stopRecordFun = null;
@@ -43,7 +44,7 @@
          }
 
          function replay() {
-             var replayer = new XQWebRecord.Replayer(events,{
+             var replayer = new XQWebRecord.Replayer(eventsArray,{
                  root:document.body,
                  //自定义播放时，某些组件不显示或者显示
                  insertStyleRules:[
@@ -103,7 +104,7 @@
         <input type="text" XQ="投保人性别"/>
     </div>
 </div>
-
+<!--
 <div id="dzqm" style="width: 400px;
     height: 400px;
     border: 1px solid;" class="play_hidden"></div>
@@ -111,7 +112,7 @@
     height: 400px;
     border: 1px solid;" class="play_show">
     <img src="" id="dzqm_img">
-</div>
+</div>-->
 <!-- built files will be auto injected -->
 </body>
 </html>

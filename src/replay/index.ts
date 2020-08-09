@@ -670,7 +670,7 @@ export class Replayer {
         next = mirror.getNode(mutation.nextId) as Node;
       }
       // next not present at this moment
-      if (mutation.nextId !== null && mutation.nextId !== -1 && !next) {
+      if (mutation.nextId  && mutation.nextId !== -1 && !next) {
         return queue.push(mutation);
       }
 
@@ -716,7 +716,7 @@ export class Replayer {
       appendNode(mutation);
     });
 
-    while (queue.length) {
+    while (queue.length>0) {
       if (queue.every((m) => !Boolean(mirror.getNode(m.parentId)))) {
         return queue.forEach((m) => this.warnNodeNotFound(d, m.node.id));
       }

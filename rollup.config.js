@@ -167,7 +167,7 @@ if (process.env.BROWSER_ONLY) {
     ],
     output: [
       {
-        name: 'XQWebRecord',
+        name: 'rrweb',
         format: 'iife',
         file: toMinPath(pkg.unpkg),
         sourcemap: true,
