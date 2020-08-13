@@ -411,4 +411,5 @@ export enum ReplayerEvents {
   EventCast = 'event-cast',
   CustomEvent = 'custom-event',
   Flush = 'flush',
+  StateChange = 'state-change',
 }
