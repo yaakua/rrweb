@@ -361,6 +361,7 @@ export type playerConfig = {
   blockClass: string;
   liveMode: boolean;
   insertStyleRules: string[];
+  customStyles:string;
   triggerFocus: boolean;
   unpackFn?: UnpackFn;
 };

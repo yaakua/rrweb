@@ -12,7 +12,7 @@
 
       <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.js"></script>-->
     <title>第二个测试页面</title>
-    <script src="../dist/rrweb.min.js"></script>
+    <script src="../dist/rrweb-all.js"></script>
     <script src="./dzqm.js"></script>
     <script src="./events.js"></script>
 
@@ -42,15 +42,56 @@
                  console.log(str);
              }
          }
+        let  replaceUrl = {
+            "https://wxapp.gwcslife.com/agentwap/fonts/mui.ttf":"https://bjciboss.oss-cn-hangzhou.aliyuncs.com/gwcslife/fonts/mui.ttf"
+        }
+        function doReplaceUrl(childNodes){
+             for (let i = 0; i < childNodes.length; i++) {
+                 let node  = childNodes[i];
+                 let type = node["type"];
+                 let tagName = node["tagName"];
+                 if(type !==2){
+                     continue;
+                 }
+                 if(tagName==="link"){
+                     let attributes = node["attributes"];
+                     let _cssText = attributes["_cssText"];
+                     for (let key in replaceUrl) {
+                         let value = replaceUrl[key];
+                         if(_cssText.indexOf(key)>-1){
+                             _cssText =_cssText.replace(key,value);
+                             console.log("####找到需要替换的url",key);
+                             attributes["_cssText"] = _cssText;
+                             node["attributes"] = attributes;
+                         }
+                     }
+
+                 }
+                 let nextChildNodes = node["childNodes"];
+                 this.doReplaceUrl(nextChildNodes);
+             }
+         }
 
          function replay() {
-             var replayer = new XQWebRecord.Replayer(eventsArray,{
+             //临时处理一些特殊路径，进行替换
+             if(eventArray.length>1){
+                 let domNode = eventArray[1];
+                 if(domNode["type"]===2){
+                     let childNodes = domNode["data"]["node"]["childNodes"];
+                     this.doReplaceUrl(childNodes);
+                 }
+             }
+
+             var replayer = new rrweb.Replayer(eventArray,{
                  root:document.body,
+                 speed:3,
+                 skipInactive:true,
                  //自定义播放时，某些组件不显示或者显示
-                 insertStyleRules:[
-                     `.play_hidden {display:none !important}`,
-                     `.play_show {display:block !important}`,
-                 ]
+                 customStyles:`
+                     .play_hidden {display:none !important;}
+                     .play_show {display:block !important;}
+                        .mui-checkbox input[type="checkbox"] {height:48px !important;}
+                    `
              });
              replayer.play();
          }
@@ -62,7 +103,7 @@
          if(window.onload){
              var onloadCall = window.onload;
              window.onload = function () {
-                 var ele = document.getElementById("dzqm");
+               /*  var ele = document.getElementById("dzqm");
                  var eleSign = new EleSign();//实例化对象
                  eleSign.init(); //初始化
                  eleSign.moutedEle(ele); //将签名节点放入到传入的element节点中
@@ -70,7 +111,7 @@
                         console.log("移动结束");
                        var base64 =   eleSign.toJpeg();
                         document.getElementById("dzqm_img").src = base64;
-                 });
+                 });*/
                  onloadCall();
              }
          }

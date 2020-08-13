@@ -40,6 +40,7 @@ const mitt = (mittProxy as any).default || mittProxy;
 const REPLAY_CONSOLE_PREFIX = '[replayer]';
 
 const defaultConfig: playerConfig = {
+  customStyles: "",
   speed: 1,
   root: document.body,
   loadTimeout: 0,
@@ -49,7 +50,7 @@ const defaultConfig: playerConfig = {
   blockClass: 'rr-block',
   liveMode: false,
   insertStyleRules: [],
-  triggerFocus: true,
+  triggerFocus: true
 };
 
 export class Replayer {
@@ -385,8 +386,19 @@ export class Replayer {
     for (let idx = 0; idx < injectStylesRules.length; idx++) {
       (styleEl.sheet! as CSSStyleSheet).insertRule(injectStylesRules[idx], idx);
     }
+    this.insertCustomStyle();
     this.emitter.emit(ReplayerEvents.FullsnapshotRebuilded, event);
     this.waitForStylesheetLoad();
+  }
+
+  private insertCustomStyle(){
+    if(this.config.customStyles!==""){
+      let styleEl = document.createElement('style')
+       styleEl.setAttribute("type",'text/css');
+       styleEl.innerHTML = this.config.customStyles;
+       const { documentElement, head } = this.iframe.contentDocument;
+        documentElement!.insertBefore(styleEl, head);
+    }
   }
 
   /**
@@ -631,7 +643,17 @@ export class Replayer {
         if (realParent && realParent.contains(target)) {
           realParent.removeChild(target);
         } else {
-          parent.removeChild(target);
+          try{
+            parent.removeChild(target);
+          }catch (e) {
+            console.error(e.message);
+            let parent = target.parentNode;
+            if(parent!=null){
+              parent.removeChild(target);
+            }else{
+              console.error("target parent is null can not execute removeChild",target);
+            }
+          }
         }
       }
     });
@@ -695,11 +717,32 @@ export class Replayer {
       } else if (next && next.parentNode) {
         // making sure the parent contains the reference nodes
         // before we insert target before next.
-        parent.contains(next)
-          ? parent.insertBefore(target, next)
-          : parent.insertBefore(target, null);
+        try{
+          parent.contains(next)
+              ? parent.insertBefore(target, next)
+              : parent.insertBefore(target, null);
+        }catch (e) {
+          console.error(e.message);
+          let parent = target.parentNode;
+          if(parent!=null){
+            parent.insertBefore(target, null)
+          }else{
+            console.error("target parent is null can not execute insertBefore",target);
+          }
+        }
       } else {
-        parent.appendChild(target);
+        try{
+          parent.appendChild(target);
+        }catch (e) {
+          console.error(e.message);
+          let parent = target.parentNode;
+          if(parent!=null){
+            parent.appendChild(target);
+          }else{
+            console.error("target parent is null can not execute appendChild",target);
+          }
+        }
+
       }
 
       if (mutation.previousId || mutation.nextId) {
@@ -752,10 +795,15 @@ export class Replayer {
       for (const attributeName in mutation.attributes) {
         if (typeof attributeName === 'string') {
           const value = mutation.attributes[attributeName];
+          let node = ((target as Node) as Element);
           if (value !== null) {
-            ((target as Node) as Element).setAttribute(attributeName, value);
+            if(node.setAttribute){
+              node.setAttribute(attributeName, value);
+            }
           } else {
-            ((target as Node) as Element).removeAttribute(attributeName);
+            if(node.removeAttribute){
+              node.removeAttribute(attributeName);
+            }
           }
         }
       }
