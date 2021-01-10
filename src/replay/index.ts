@@ -695,14 +695,21 @@ export class Replayer {
       ...this.legacy_missingNodeRetryMap,
     };
     const queue: addedNodeMutation[] = [];
-
+    //临时缓存所有已经插入过的node
+    const queueCache  = {};
     const appendNode = (mutation: addedNodeMutation) => {
       if (!this.iframe.contentDocument) {
         return console.warn('Looks like your replayer has been destroyed.');
       }
       let parent = mirror.getNode(mutation.parentId);
+      let nodeId = mutation.node.id;
       if (!parent) {
         return queue.push(mutation);
+        /*if(!queueCache[nodeId]){
+          queueCache[nodeId] = mutation;
+        }else{
+          return console.warn("重复节点,无需重复插入");
+        }*/
       }
 
       const parentInDocument = this.iframe.contentDocument.contains(parent);
@@ -726,7 +733,14 @@ export class Replayer {
       }
       // next not present at this moment
       if (mutation.nextId  && mutation.nextId !== -1 && !next) {
-        return queue.push(mutation);
+        // console.log("####mutation.nextId",mutation.nextId);
+        // return queue.push(mutation);
+        if(!queueCache[nodeId]){
+          queueCache[nodeId] = mutation;
+          return queue.push(mutation);
+        }else{
+          return console.warn("nextId重复节点,无需重复插入");
+        }
       }
 
       const target = buildNodeWithSN(
@@ -791,7 +805,6 @@ export class Replayer {
     d.adds.forEach((mutation) => {
       appendNode(mutation);
     });
-
     while (queue.length>0) {
       if (queue.every((m) => !Boolean(mirror.getNode(m.parentId)))) {
         return queue.forEach((m) => this.warnNodeNotFound(d, m.node.id));
@@ -799,6 +812,7 @@ export class Replayer {
       const mutation = queue.shift()!;
       appendNode(mutation);
     }
+    queueCache = {};
 
     if (Object.keys(legacy_missingNodeMap).length) {
       Object.assign(this.legacy_missingNodeRetryMap, legacy_missingNodeMap);

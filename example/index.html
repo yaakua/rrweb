@@ -14,7 +14,7 @@
     <title>第二个测试页面</title>
     <script src="../dist/rrweb-all.js"></script>
     <script src="./dzqm.js"></script>
-    <script src="./events.js"></script>
+    <script src="./events7.js"></script>
 
      <script>
          var stopRecordFun = null;
@@ -22,10 +22,10 @@
 
          function record() {
              console.log("record");
-             stopRecordFun = XQWebRecord.record({
+             stopRecordFun = rrweb.record({
                  emit(event) {
                      // 用任意方式存储 event
-                     console.log(event);
+                     console.log(event["data"]["source"]);
                      events.push(event);
                  },
              });
@@ -55,7 +55,7 @@
                  }
                  if(tagName==="link"){
                      let attributes = node["attributes"];
-                     let _cssText = attributes["_cssText"];
+                     let _cssText = attributes["_cssText"] ||"";
                      for (let key in replaceUrl) {
                          let value = replaceUrl[key];
                          if(_cssText.indexOf(key)>-1){
@@ -74,15 +74,15 @@
 
          function replay() {
              //临时处理一些特殊路径，进行替换
-             if(eventArray.length>1){
-                 let domNode = eventArray[1];
+             if(events2.length>1){
+                 let domNode = events2[1];
                  if(domNode["type"]===2){
                      let childNodes = domNode["data"]["node"]["childNodes"];
                      this.doReplaceUrl(childNodes);
                  }
              }
 
-             var replayer = new rrweb.Replayer(eventArray,{
+             var replayer = new rrweb.Replayer(events2,{
                  root:document.body,
                  speed:3,
                  skipInactive:true,
